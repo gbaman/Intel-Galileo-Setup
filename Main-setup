@@ -1,0 +1,55 @@
+#Galileo main setup script for myself
+#Very quickly thrown together, not guaranteed to work
+
+
+#Configures the Intel Galileo for use
+#Sets time, sets up repository
+#Installs build tools
+#Installs ncurses and nano
+#Installs pip
+#Grabs pyserial
+
+echo "Setting up Galileo"
+echo ""
+echo "Enter an IP address of a linux computer on the network to grab the time from
+read timeIP
+date -u `ssh andrew@$timeIP date -u '+%m%d%H%M%Y.%S'`
+
+#Add Alex's repo info
+echo "src all     http://alextgalileo.altervista.org/pkgrepo/all" >> /etc/opkg/base-feeds.conf
+echo "src clanton http://alextgalileo.altervista.org/pkgrepo/clanton"  >> /etc/opkg/base-feeds.conf
+echo "src i586    http://alextgalileo.altervista.org/pkgrepo/i586" >> /etc/opkg/base-feeds.conf
+
+
+#http://alextgalileo.altervista.org/blog/installing-development-tools-onto-official-linux-image/
+#Adds build tools
+opkg update
+opkg install --force-overwrite uclibc
+opkg install packagegroup-core-buildessential
+
+
+#Builds ncurses and nano
+wget http://www.nano-editor.org/dist/v2.2/nano-2.2.6.tar.gz
+tar xvzf nano-2.2.6.tar.gz 
+wget http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz
+tar xvzf ncurses-5.9.tar.gz   
+echo "About to compile ncurses and nano, this will take 10-20 mins
+cd ncurses-5.9
+./configure
+make
+make install
+cd ../
+cd nano-2.2.6
+./configure
+make
+make install
+
+
+#Install pip (python package manager)
+wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate
+python get-pip.py 
+pip install pyserial
+
+echo ""
+echo ""
+echo "Intel Galileo is now setup for use."
